@@ -226,6 +226,7 @@ def main():
     p = ["cifar10", "cifar100", "cub", "car", "imgnet100", "herb"]
     old = [5, 80, 100, 98, 50, 341]
     new = [5, 20, 100, 98, 50, 342]
+    
     # logger = get_logger('sskmeans_runtime.txt')
     for i, pi in enumerate(p):
         print(pi)

@@ -365,12 +365,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
             description='cluster',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--lr', type=float, default=1e-3) # 1e-1
+    parser.add_argument('--lr', type=float, default=1e-2) # 1e-1
     parser.add_argument('--lr_linear', type=float, default=1e-1)
     # parser.add_argument('--min_lr_rate', type=float, default=0.001)
     parser.add_argument('--gamma', type=float, default=0.5)
     parser.add_argument('--momentum', type=float, default=0.9)
-    parser.add_argument('--weight_decay', type=float, default=5e-4)
+    parser.add_argument('--weight_decay', type=float, default=5e-5)
     parser.add_argument('--epochs', default=200, type=int)
     parser.add_argument('--batch_size', default=128, type=int)
  
@@ -387,7 +387,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--vit_small', action='store_true')
     parser.add_argument('--dinov2', action='store_true')
-    parser.add_argument('--dataset_name', type=str, default='cifar100', help='options: cifar10, cifar100, imagenet100, cub, car, herb')
+    parser.add_argument('--dataset_name', type=str, default='cifar100', help='options: cifar10, cifar100, imgnet100, cub, car, herb')
 
     args = parser.parse_args()
     args.cuda = torch.cuda.is_available()
@@ -449,7 +449,7 @@ if __name__ == "__main__":
         train_loader = CUBLoaderMixGCD(root=args.dataset_root, batch_size=args.batch_size, aug='twice', shuffle=False, sampler=True, num_lab_classes=args.num_labeled_classes)
         train_loader_test = CUBLoaderMixGCD(root=args.dataset_root, batch_size=args.batch_size, aug=None, shuffle=False, num_lab_classes=args.num_labeled_classes)
 
-    elif args.dataset_name == 'imagenet100':
+    elif args.dataset_name == 'imgnet100':
         args.num_unlabeled_classes = 50
         args.num_labeled_classes = 50
         args.num_classes = args.num_labeled_classes + args.num_unlabeled_classes

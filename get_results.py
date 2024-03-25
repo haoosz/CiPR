@@ -9,6 +9,7 @@ from sklearn.metrics import adjusted_rand_score as ari_score
 from sklearn.cluster import KMeans
 from utils.utils import BCE, PairSame, minmaxscaler, norm_feat, PairEnum, cluster_acc, Identity, AverageMeter, seed_torch
 from utils import ramps 
+from utils.heads import MLP, DINOHead
 from models.vision_transformer import vit_base
 from data.cifarloader import CIFAR100LoaderMixGCD, CIFAR10LoaderMixGCD
 from data.imgnetloader import IMGNet100LoaderMixGCD
@@ -77,16 +78,25 @@ class MLP(nn.Module):
         return self.net(x)
 
 class ViT_Linear(nn.Module):
-    def __init__(self, dim_out):
+    def __init__(self, dim_out, vit_samll=False, dinov2=False):
         super(ViT_Linear, self).__init__()
-        self.backbone = vit_base()
+
+        if vit_samll:
+            self.backbone = vit_small()
+            print("Using ViT-small!")
+        elif dinov2:
+            self.backbone = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitb14')
+            print("Using Dinov2!")
+        else:
+            self.backbone = vit_base()
         
-        self.head = MLP(self.backbone.embed_dim, dim_out, num_layers=4)
+        # self.head = MLP(self.backbone.embed_dim, dim_out, num_layers=4)
+        self.head = DINOHead(self.backbone.embed_dim, dim_out)
 
     def forward(self, x):
         y = self.backbone(x) # batch, dim
         embed = F.normalize(self.head(y), dim=1)
-        
+        # embed = self.head(y)
         return embed, y
 
 if __name__ == "__main__":
@@ -113,6 +123,8 @@ if __name__ == "__main__":
     parser.add_argument('--lambd', default=0.35, type=float)
     parser.add_argument('--proj_dim', default=65536, type=float)
 
+    parser.add_argument('--vit_small', action='store_true')
+    parser.add_argument('--dinov2', action='store_true')
     parser.add_argument('--dataset_name', type=str, default='herb')
 
     args = parser.parse_args()
@@ -121,12 +133,9 @@ if __name__ == "__main__":
     seed_torch(args.seed)
 
     runner_name = os.path.basename(__file__).split(".")[0]
-    model_dir= os.path.join(args.exp_root, runner_name)
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
-    args.model_dir = model_dir+'/'+'{}_{}'.format(args.model_name, args.dataset_name) 
-    if not os.path.exists(args.model_dir):
-        os.makedirs(args.model_dir)
+    model_dir= os.path.join(args.exp_root, 'run')
+    args.model_dir = model_dir+'/'+'{}_{}/final.pth'.format(args.model_name, args.dataset_name)
+    print("Load model from {}".format(args.model_dir))
 
     dataset_txt = args.dataset_name.split('_')[0]
 
@@ -135,17 +144,13 @@ if __name__ == "__main__":
     device_ids = range(args.gpus)
     model = ViT_Linear(args.proj_dim, vit_samll=args.vit_small, dinov2=args.dinov2).to(device)
     model = torch.nn.DataParallel(model, device_ids=device_ids)
+    
 
-
-    if args.mode=='train':
-        if args.vit_small:
-            args.warmup_model_dir = "./pretrain/dino_deitsmall16_pretrain.pth"
-        if not args.dinov2:
-            state_dict = torch.load(args.warmup_model_dir)
-            model.module.backbone.load_state_dict(state_dict)
-        for name, param in model.module.backbone.named_parameters(): 
-            if 'blocks.11' not in name:
-                param.requires_grad = False
+    if args.vit_small:
+        args.warmup_model_dir = "./pretrain/dino_deitsmall16_pretrain.pth"
+    if not args.dinov2:
+        state_dict = torch.load(args.warmup_model_dir)
+        model.module.backbone.load_state_dict(state_dict)
                 
     if args.dataset_name == 'cifar100':
         args.num_unlabeled_classes = 20
@@ -171,7 +176,7 @@ if __name__ == "__main__":
         train_loader = CUBLoaderMixGCD(root=args.dataset_root, batch_size=args.batch_size, aug='twice', shuffle=False, sampler=True, num_lab_classes=args.num_labeled_classes)
         train_loader_test = CUBLoaderMixGCD(root=args.dataset_root, batch_size=args.batch_size, aug=None, shuffle=False, num_lab_classes=args.num_labeled_classes)
 
-    elif args.dataset_name == 'imagenet100':
+    elif args.dataset_name == 'imgnet100':
         args.num_unlabeled_classes = 50
         args.num_labeled_classes = 50
         args.num_classes = args.num_labeled_classes + args.num_unlabeled_classes
@@ -205,5 +210,5 @@ if __name__ == "__main__":
         train_loader_test = AirLoaderMixGCD(root=args.dataset_root, batch_size=args.batch_size, aug=None, shuffle=False, num_lab_classes=args.num_labeled_classes)
 
     root = "./features/{}".format(args.dataset_name)
-    model.module.backbone.load_state_dict(torch.load(args.model_dir), strict=False)
+    model.load_state_dict(torch.load(args.model_dir), strict=True)
     get_files(model, root, train_loader_test, False)

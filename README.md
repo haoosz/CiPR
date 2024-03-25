@@ -15,7 +15,7 @@ TMLR
 
 ![teaser](img/pipe.png)
 
-*TL;DR: A simple cross-attention mechanism is efficient to disentangle visual concepts, i.e., attribute and object concepts, enhancing CZSL performance.*
+*TL;DR: We present an efficient GCD framework that designs a novel semi-supervised clustering method to generate reliable and high-purity cross-instance positive relations, incorporated into joint contrastive learning.*
 
 ---
 
@@ -32,7 +32,7 @@ pip install -r requirements.txt
 ## Download
 
 ### Pretrained model
-The pretrained DINO weights can be downloaded [here](https://github.com/facebookresearch/dino?tab=readme-ov-file#pretrained-models).
+The pretrained DINO weights can be downloaded [here](https://github.com/facebookresearch/dino?tab=readme-ov-file#pretrained-models). Save the pretrained model to `./pretrain`.
 
 ### Dataset
 
@@ -56,9 +56,11 @@ and we test the model using
 python run.py --dataset_name DATASET --mode test
 ```
 
+The option of `DATASET` includes: `cifar10`, `cifar100`, `imgnet100`, `cub`, `car`, and `herb`.
+
 ## Test with different clustering methods
 
-We first obtain the extracted features using
+We first obtain the extracted features to `./features` using
 ```
 bash scripts/get_feat.sh
 ```
@@ -71,7 +73,13 @@ The implementation of SNC can be found in `./snc/clustering.py`. It is an effici
 
 Alternatively, we test with semi-supervised k-means using
 ```
-python sskmeans.py
+python eval_sskmeans.py
+```
+
+## Class number estimation
+With all obtained features, we can estimate the number of classes using
+```
+python class_estimate.py
 ```
 
 ## Citation

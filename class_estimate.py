@@ -50,9 +50,9 @@ plt.figure(figsize=(24, 12.8))
 for di, pi in enumerate(p):
     dataset = pi
 
-    out = np.load('./features_final/'+ dataset +'_dynamic/outputs.npy')
-    trg = np.load('./features_final/'+ dataset +'_dynamic/targets.npy')
-    msk = np.load('./features_final/'+ dataset +'_dynamic/masks.npy')
+    out = np.load('./features/'+ dataset +'/outputs.npy')
+    trg = np.load('./features/'+ dataset +'/targets.npy')
+    msk = np.load('./features/'+ dataset +'/masks.npy')
 
     if pi == 'cifar10':
         ratio = 0.6
@@ -90,7 +90,7 @@ for di, pi in enumerate(p):
     if pi == 'herb':
         last = 1
         next = 3
-    _, c_all, d_all = req_numclust(prd[:,last], out, req_clust=x[next], distance='cosine', labeled=trg, mask=msk_new, chain_length=length)
+    _, c_all, d_all = req_numclust(prd[:,last], out, req_clust=x[next], distance='cosine', labeled=trg, mask=msk_new)
 
 
     CN = []
