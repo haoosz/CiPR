@@ -25,11 +25,16 @@ Create a conda environment `cipr` using
 ```
 conda create -n cipr python=3.8.12
 conda activate cipr
-conda install pytorch==1.7.1 torchvision==0.8.2 cudatoolkit=11.0
+conda install pytorch==1.7.1 torchvision==0.8.2 cudatoolkit=11.0 -c conda-forge -c pytorch
 pip install -r requirements.txt
 ```
 
-## Dataset
+## Download
+
+### Pretrained model
+The pretrained DINO weights can be downloaded [here](https://github.com/facebookresearch/dino?tab=readme-ov-file#pretrained-models).
+
+### Dataset
 
 We use finegrained datasets, including:
 
