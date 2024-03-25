@@ -104,23 +104,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
             description='cluster',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--lr', type=float, default=5e-3) # 1e-1
-    parser.add_argument('--lr_linear', type=float, default=1e-1)
-    # parser.add_argument('--min_lr_rate', type=float, default=0.001)
-    parser.add_argument('--gamma', type=float, default=0.5)
-    parser.add_argument('--momentum', type=float, default=0.9)
-    parser.add_argument('--weight_decay', type=float, default=5e-4)
-    parser.add_argument('--epochs', default=200, type=int)
-    parser.add_argument('--batch_size', default=128, type=int)
 
+    parser.add_argument('--batch_size', default=128, type=int)
     parser.add_argument('--exp_root', type=str, default='./checkpoints/')
     parser.add_argument('--warmup_model_dir', type=str, default='./pretrain/dino_vitbase16_pretrain.pth')
-    # parser.add_argument('--IL', action='store_true', default=False, help='w/ incremental learning')
     parser.add_argument('--model_name', type=str, default='cipr')
     parser.add_argument('--seed', default=1, type=int)
-    parser.add_argument('--mode', type=str, default='train')
     parser.add_argument('--gpus', default=1, type=int)
-    parser.add_argument('--lambd', default=0.35, type=float)
     parser.add_argument('--proj_dim', default=65536, type=float)
 
     parser.add_argument('--vit_small', action='store_true')
@@ -134,7 +124,7 @@ if __name__ == "__main__":
 
     runner_name = os.path.basename(__file__).split(".")[0]
     model_dir= os.path.join(args.exp_root, 'run')
-    args.model_dir = model_dir+'/'+'{}_{}/final.pth'.format(args.model_name, args.dataset_name)
+    args.model_dir = model_dir+'/{}_{}/final.pth'.format(args.model_name, args.dataset_name)
     print("Load model from {}".format(args.model_dir))
 
     dataset_txt = args.dataset_name.split('_')[0]
