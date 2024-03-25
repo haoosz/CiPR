@@ -391,7 +391,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     args.cuda = torch.cuda.is_available()
-    print(args.cuda)
     device = torch.device("cuda" if args.cuda else "cpu")
     seed_torch(args.seed)
 

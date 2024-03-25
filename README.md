@@ -25,7 +25,7 @@ Create a conda environment `cipr` using
 ```
 conda create -n cipr python=3.8.12
 conda activate cipr
-conda install -c pytorch pytorch==1.7.1 torchvision==0.8.2 cudatoolkit=11.0
+conda install pytorch==2.0.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
 pip install -r requirements.txt
 ```
 
